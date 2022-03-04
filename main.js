@@ -4,7 +4,44 @@ var keys = [];
 
 cameraMove = {x:0, z:0}
 
-var light, camera, waterMesh, skybox
+var light, camera, waterMesh, skybox, particleSystem, fountain
+
+var createNewSystem = function(scene) {
+	var fogTexture = new BABYLON.Texture("https://raw.githubusercontent.com/aWeirdo/Babylon.js/master/smoke_15.png", scene);
+	fountain = BABYLON.Mesh.CreateBox("foutain", .01, scene);
+	fountain.visibility = 0;
+	fountain.position = new BABYLON.Vector3(0, 40, 0);
+	if (particleSystem) {
+		particleSystem.dispose();
+	}
+
+	particleSystem = new BABYLON.ParticleSystem("particles", 2500 , scene);
+	particleSystem.manualEmitCount = particleSystem.getCapacity();
+	particleSystem.minEmitBox = new BABYLON.Vector3(-25, 2, -25); // Starting all from
+	particleSystem.maxEmitBox = new BABYLON.Vector3(25, 2, 25); // To...
+
+	particleSystem.particleTexture = fogTexture.clone();
+	particleSystem.emitter = fountain;
+	
+	particleSystem.color1 = new BABYLON.Color4(0.8, 0.8, 0.8, 0.1);
+	particleSystem.color2 = new BABYLON.Color4(.95, .95, .95, 0.15);
+	particleSystem.colorDead = new BABYLON.Color4(0.9, 0.9, 0.9, 0.1);
+	particleSystem.minSize = 3.5;
+	particleSystem.maxSize = 5.0;
+	particleSystem.minLifeTime = Number.MAX_SAFE_INTEGER;
+	particleSystem.emitRate = 50000;
+	particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
+	particleSystem.gravity = new BABYLON.Vector3(0, 0, 0);
+	particleSystem.direction1 = new BABYLON.Vector3(0, 0, 0);
+	particleSystem.direction2 = new BABYLON.Vector3(0, 0, 0);
+	particleSystem.minAngularSpeed = -2;
+	particleSystem.maxAngularSpeed = 2;
+	particleSystem.minEmitPower = .5;
+	particleSystem.maxEmitPower = 1;
+	particleSystem.updateSpeed = 0.05;
+
+	particleSystem.start();
+}
 
 var createScene = function() {
     var scene = new BABYLON.Scene(engine);
@@ -42,6 +79,8 @@ var createScene = function() {
 	shadowGenerator.blurKernel = 32;
 	shadowGenerator.useContactHardeningShadow = true;
 	shadowGenerator.setDarkness(0.05);
+
+    //createNewSystem(scene);
 
 	// Ground
 	var groundTexture = new BABYLON.Texture("textures/sand.jpg", scene);
@@ -104,11 +143,7 @@ var createScene = function() {
 	};
 	terrain = new BABYLON.DynamicTerrain("terrain", params, scene);
 	terrain.mesh.material = groundMaterial;
-	terrain.subToleranceX = 8;
-	terrain.subToleranceZ = 8;
-	terrain.LODLimits = [4, 3, 2, 1, 1];
 	terrain.mesh.receiveShadows = true;
-	terrain.mesh.checkCollisions = true;
 	terrain.mesh.material.freeze();
 	terrain.mesh.position.y = -2;
 	water.addToRenderList(terrain.mesh);
@@ -153,6 +188,9 @@ engine.runRenderLoop(function () {
 	waterMesh.position.z = camera.position.z;
 	skybox.position.x = camera.position.x;
 	skybox.position.z = camera.position.z;
+
+	// fountain.position.x = camera.position.x;
+	// fountain.position.z = camera.position.z;
 });
 
 // Watch for browser/canvas resize events
