@@ -91,11 +91,13 @@ QuickTreeGenerator = function(sizeBranch, sizeTrunk, radius, trunkMaterial, leaf
 var green, bark
 
 class TreeChunk{
-    constructor(position, scene){
+    constructor(position, scene, water, shadowcaster){
         this.position = position;
         this.scene = scene;
         this.trees = []
         this.generated = false;
+        this.water = water;
+        this.shadowcaster = shadowcaster;
     }
 
     generate(terrain){
@@ -108,6 +110,8 @@ class TreeChunk{
                     tree.position.z = z + rand[1];
                     tree.position.y = terrain.getHeightFromMap(x + rand[0], z + rand[1]);
                     this.trees.push(tree);
+                    this.water.addToRenderList(tree);
+                    this.shadowcaster.addShadowCaster(tree);
                 }
             }
         }
@@ -127,7 +131,7 @@ class TreeChunk{
 }
 
 class TreeMaker{
-    constructor(scene, terrain){
+    constructor(scene, terrain, water, shadowcaster){
         this.scene = scene;
         this.chunks = [];
         this.renderdist = 1
@@ -145,8 +149,8 @@ class TreeMaker{
         bark.diffuseTexture.uScale = 2.0;//Repeat 5 times on the Vertical Axes
         bark.diffuseTexture.vScale = 2.0;//Repeat 5 times on the Horizontal Axes
 
-        this.chunk1 = new TreeChunk([0, 0], scene);
-        this.chunk2 = new TreeChunk([0, 100], scene);
+        this.chunk1 = new TreeChunk([0, 0], scene, water, shadowcaster);
+        this.chunk2 = new TreeChunk([0, 100], scene, water, shadowcaster);
         this.passive = this.chunk2
         this.active = this.chunk1
     }

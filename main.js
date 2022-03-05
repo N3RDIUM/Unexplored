@@ -161,12 +161,8 @@ var createScene = function() {
 
 	// Shadows
 	var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
-	shadowGenerator.useContactHardeningShadow = true;
-	shadowGenerator.usePoissonSampling = true;
 	shadowGenerator.transparencyShadow = true;
 	shadowGenerator.transparencyShadowAlpha = 0.7;
-	shadowGenerator.useKernelBlur = true;
-	shadowGenerator.blurKernel = 32;
 	shadowGenerator.useContactHardeningShadow = true;
 	shadowGenerator.setDarkness(0.05);
 
@@ -238,7 +234,12 @@ var createScene = function() {
 	terrain.mesh.position.y = -2;
 	water.addToRenderList(terrain.mesh);
 
-	generator = new TreeMaker(scene, terrain)
+	terrain.mesh.receiveShadows = true;
+	waterMesh.receiveShadows = true;
+
+	shadowGenerator.addShadowCaster(terrain.mesh);
+
+	generator = new TreeMaker(scene, terrain, water, shadowGenerator)
 
 	return scene;
 };
@@ -251,6 +252,7 @@ engine.runRenderLoop(function () {
 	camera.inputs.attached.mouse.detachControl();
 	light.position = camera.position.clone();
 	light.position.y += 200;
+	camera.position.y  = 10
 	camera.rotation.x = 85 * Math.PI / 180;
 	camera.rotation.y = 45 * Math.PI / 180;
 	camera.rotation.z = 45 * Math.PI / 180;
