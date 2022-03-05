@@ -99,9 +99,9 @@ class TreeChunk{
     }
 
     generate(terrain){
-        for (var x = 0; x < 100 + this.position[0]; x += 5) {
-            for (var z = 0; z < 100 + this.position[1]; z += 5) {
-                if(terrain.getHeightFromMap(x, z) > 3 && Math.round(Math.random(-500, 500)) == 0) {
+        for (var x = 0; x < 100 + this.position[0]; x += 10) {
+            for (var z = 0; z < 100 + this.position[1]; z += 10) {
+                if(terrain.getHeightFromMap(x, z) > 3 && Math.round(Math.random(-1000, 1000)) == 0) {
                     var tree = QuickTreeGenerator(4, 6, 1, bark, green, scene);
                     let rand = [Math.random(-15, 15), Math.random(-15, 15)];
                     tree.position.x = x + rand[0];
