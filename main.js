@@ -145,8 +145,9 @@ var createScene = function() {
 	_light.intensity = 0.5;
 
 	// light1
-	light = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(-0, 80, -80), new BABYLON.Vector3(0, -1, 0), Math.PI / 5, 1, scene);
-	light.intensity = 0.8;
+	light = new BABYLON.SpotLight("directionalLight", new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, -1, 0), Math.PI / 2, 1, scene);
+	light.intensity = 1;
+	light.autoUpdateExtends = false
 
 	// Skybox
 	skybox = BABYLON.Mesh.CreateBox("skyBox", 1000.0, scene);
@@ -164,7 +165,9 @@ var createScene = function() {
 	shadowGenerator.transparencyShadow = true;
 	shadowGenerator.transparencyShadowAlpha = 0.7;
 	shadowGenerator.useContactHardeningShadow = true;
-	shadowGenerator.setDarkness(0.05);
+	shadowGenerator.usePoissonSampling = true;
+	shadowGenerator.blurBoxOffset = 0.01;
+	shadowGenerator.setDarkness(0.2);
 
     //createNewSystem(scene);
 
@@ -200,7 +203,7 @@ var createScene = function() {
     var mapSubZ = 800;              // point number on Z axis
     var seed = 0.3;                 // seed
     var noiseScale = 0.01;         // noise frequency
-    var elevationScale = 20;
+    var elevationScale = 10;        // elevation scale
     noise.seed(seed);
     var mapData = new Float32Array(mapSubX * mapSubZ * 3); // 3 float values per point : x, y and z
 
@@ -229,7 +232,6 @@ var createScene = function() {
 	};
 	terrain = new BABYLON.DynamicTerrain("terrain", params, scene);
 	terrain.mesh.material = groundMaterial;
-	terrain.mesh.receiveShadows = true;
 	terrain.mesh.material.freeze();
 	terrain.mesh.position.y = -2;
 	water.addToRenderList(terrain.mesh);
@@ -238,6 +240,7 @@ var createScene = function() {
 	waterMesh.receiveShadows = true;
 
 	shadowGenerator.addShadowCaster(terrain.mesh);
+	//shadowGenerator.addShadowCaster(waterMesh);
 
 	generator = new TreeMaker(scene, terrain, water, shadowGenerator)
 
@@ -250,9 +253,12 @@ const scene = createScene(); //Call the createScene function
 engine.runRenderLoop(function () {
     scene.render();
 	camera.inputs.attached.mouse.detachControl();
+
 	light.position = camera.position.clone();
-	light.position.y += 200;
-	camera.position.y  = 10
+	light.position.y += 8
+	light.position.z += 4
+	light.position.x += 4
+
 	camera.rotation.x = 85 * Math.PI / 180;
 	camera.rotation.y = 45 * Math.PI / 180;
 	camera.rotation.z = 45 * Math.PI / 180;
@@ -260,16 +266,16 @@ engine.runRenderLoop(function () {
 	camera.position.y = 30
 
 	if (keys[87]) {
-		cameraMove.z += 0.15;
+		cameraMove.z += 0.075;
 	}
 	if (keys[83]) {
-		cameraMove.z -= 0.15;
+		cameraMove.z -= 0.075;
 	}
 	if (keys[65]) {
-		cameraMove.x -= 0.15;
+		cameraMove.x -= 0.075;
 	}
 	if (keys[68]) {
-		cameraMove.x += 0.15;
+		cameraMove.x += 0.075;
 	}
 
 	camera.position.x += cameraMove.x;
