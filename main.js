@@ -174,7 +174,7 @@ var createScene = function() {
     //createNewSystem(scene);
 
 	// Ground
-	var groundTexture = new BABYLON.Texture("textures/sand.jpg", scene);
+	var groundTexture = new BABYLON.Texture("textures/sand.png", scene);
 	groundTexture.vScale = groundTexture.uScale = 4.0;
 	
 	var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
@@ -195,6 +195,13 @@ var createScene = function() {
 	water.colorBlendFactor = 0.3;
 	water.addToRenderList(skybox);
 	waterMesh.material = water;
+
+	var shapeMaterial = new BABYLON.StandardMaterial("mat", scene);
+	shapeMaterial.backFaceCulling = true;
+	shapeMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
+	shapeMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.CUBIC_MODE;
+	shapeMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+	shapeMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
 
 	var mapSubX = 500;
 	var mapSubZ = 300;
