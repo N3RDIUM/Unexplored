@@ -2,6 +2,8 @@ const canvas = document.getElementById("renderCanvas"); // Get the canvas elemen
 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
 var keys = [];
 
+devmode = false;
+
 cameraMove = {x:0, z:0}
 QuickTreeGenerator = function(sizeBranch, sizeTrunk, radius, trunkMaterial, leafMaterial, scene) {
 
@@ -94,7 +96,7 @@ QuickTreeGenerator = function(sizeBranch, sizeTrunk, radius, trunkMaterial, leaf
 };
 // TODO: add trees to land
 
-var light, camera, waterMesh, skybox, particleSystem, fountain, generator
+var light, camera, waterMesh, skybox, particleSystem, fountain, generator, handler
 
 var createNewSystem = function(scene) {
 	var fogTexture = new BABYLON.Texture("https://raw.githubusercontent.com/aWeirdo/Babylon.js/master/smoke_15.png", scene);
@@ -236,6 +238,8 @@ var createScene = function() {
 	terrain.mesh.position.y = -2;
 	water.addToRenderList(terrain.mesh);
 
+	handler = new IslandHandler(terrain, camera, scene, shadowGenerator);
+
 	terrain.mesh.receiveShadows = true;
 	waterMesh.receiveShadows = true;
 
@@ -252,18 +256,21 @@ const scene = createScene(); //Call the createScene function
 // Register a render loop to repeatedly render the scene
 engine.runRenderLoop(function () {
     scene.render();
-	camera.inputs.attached.mouse.detachControl();
+	if(!devmode){
+		camera.inputs.attached.mouse.detachControl();
+	}
 
 	light.position = camera.position.clone();
 	light.position.y += 8
 	light.position.z += 4
 	light.position.x += 4
+	if(!devmode){
+		camera.rotation.x = 85 * Math.PI / 180;
+		camera.rotation.y = 45 * Math.PI / 180;
+		camera.rotation.z = 45 * Math.PI / 180;
 
-	camera.rotation.x = 85 * Math.PI / 180;
-	camera.rotation.y = 45 * Math.PI / 180;
-	camera.rotation.z = 45 * Math.PI / 180;
-
-	camera.position.y = 30
+		camera.position.y = 30
+	}
 
 	if (keys[87]) {
 		cameraMove.z += 0.075;
@@ -293,6 +300,7 @@ engine.runRenderLoop(function () {
 	// fountain.position.z = camera.position.z;
 
 	generator.update([camera.position.x, camera.position.z]);
+	handler.update()
 });
 
 // Watch for browser/canvas resize events
