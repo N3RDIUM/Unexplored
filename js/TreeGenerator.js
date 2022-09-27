@@ -87,3 +87,4 @@ QuickTreeGenerator = function(sizeBranch, sizeTrunk, radius, trunkMaterial, leaf
     return tree;
 
 };
+

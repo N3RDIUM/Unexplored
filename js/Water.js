@@ -3,7 +3,7 @@ class Water {
         this.scene = scene;
 
         this.mesh = BABYLON.Mesh.CreateGround("waterMesh", 1000, 1000, 32, scene, false);
-        this.mesh.position.y = 2;
+        this.mesh.position.y = 0;
 
         this.water = new BABYLON.WaterMaterial("waterMaterial", scene, new BABYLON.Vector2(512, 512));
         this.water.backFaceCulling = false;

@@ -1,21 +1,24 @@
 const canvas = document.getElementById("renderCanvas"); // Get the canvas element
 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
 var keys = [];
+var cameraSpeed = 0.6;
+var camera_move = [0, 0];
 
 var terrain, water, camera, light
 
 var createScene = function () {
 	const scene = new BABYLON.Scene(engine);
-	
-	camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, BABYLON.Vector3.Zero(), scene);
-	camera.setPosition(new BABYLON.Vector3(0, 0, -10));
-	camera.attachControl(canvas, true);
 
 	light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-	light.intensity = 0.7;
+	light.intensity = 1;
+
+	// wasd movement
+	camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(0, 69, 0), scene);
+	camera.rotation.x = Math.PI / 2;
 	
 	terrain = new Terrain(scene);
 	water = new Water(scene, terrain);
+	terrain.water = water;
 
 	return scene;
 }
@@ -28,9 +31,57 @@ engine.runRenderLoop(function () {
 
 	water.mesh.position.x = camera.position.x;
 	water.mesh.position.z = camera.position.z;
+
+	terrain.update([camera.position.x, camera.position.z]);
+
+	// wasd movement
+	var cameraRotation = camera.rotation.y;
+	if (keys[87]) {
+		camera_move[0] += Math.sin(cameraRotation) * cameraSpeed;
+		camera_move[1] += Math.cos(cameraRotation) * cameraSpeed;
+	}
+	if (keys[83]) {
+		camera_move[0] += -Math.sin(cameraRotation) * cameraSpeed;
+		camera_move[1] += -Math.cos(cameraRotation) * cameraSpeed;
+	}
+	if (keys[68]) {
+		camera_move[0] += Math.cos(cameraRotation) * cameraSpeed;
+		camera_move[1] += -Math.sin(cameraRotation) * cameraSpeed;
+	}
+	if (keys[65]) {
+		camera_move[0] += -Math.cos(cameraRotation) * cameraSpeed;
+		camera_move[1] += Math.sin(cameraRotation) * cameraSpeed;
+	}
+
+	camera.position.x += camera_move[0];
+	camera.position.z += camera_move[1];
+
+	camera_move[0] *= 0.9;
+	camera_move[1] *= 0.9;
 });
 
 // Watch for browser/canvas resize events
 window.addEventListener("resize", function () {
     engine.resize();
+});
+
+// Keyboard events
+window.addEventListener("keydown", function (e) {
+	keys[e.keyCode] = true;
+});
+window.addEventListener("keyup", function (e) {
+	keys[e.keyCode] = false;
+});
+
+// scroll events
+window.addEventListener("wheel", function (e) {
+	camera.position.y += e.deltaY / 20;
+
+	if (camera.position.y < 69) {
+		camera.position.y = 69;
+	}
+
+	if (camera.position.y > 256) {
+		camera.position.y = 256;
+	}
 });
