@@ -13,7 +13,7 @@ var createScene = function () {
 	light_ambient.intensity = 0.69;
 
 	// wasd movement
-	camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(0, 1024, 0), scene);
+	camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(0, 256, 0), scene);
 	camera.rotation.x = Math.PI / 2;
 
 	// add shadow caster
