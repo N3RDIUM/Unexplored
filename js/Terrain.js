@@ -6,15 +6,16 @@ class TreeChunk{
         this.scene = scene;
         this.trees = []
         this.generated = false;
+        this.threshold = 8;
     }
 
     generate(terrain){
-        for (var x = this.position[0] - 250; x < 250 + this.position[0]; x += 25) {
-            for (var z = this.position[1] - 250; z < 250 + this.position[1]; z += 25) {
-                if(terrain.getHeightFromMap(x, z) > 7 && noise.perlin2(x / 100, z / 100)*10 < -1){
-                    var tree = QuickTreeGenerator(8, 6, 1, bark, green, scene);
-                    tree.position.x = x + noise.perlin2(x / 2, z / 2)*10;
-                    tree.position.z = z + noise.perlin2(x / 2, z / 2)*10;
+        for (var x = this.position[0] - this.threshold; x < this.threshold + this.position[0]; x += 8) {
+            for (var z = this.position[1] - this.threshold; z < this.threshold + this.position[1]; z += 8) {
+                if(terrain.getHeightFromMap(x, z) > 7){
+                    var tree = QuickTreeGenerator(8, 6, 1, bark, green, this.scene);
+                    tree.position.x = x + noise.perlin2(x / 10, z / 10)*24;
+                    tree.position.z = z + noise.perlin2(x / 10, z / 10)*24;
                     tree.position.y = terrain.getHeightFromMap(x, z);
                     this.trees.push(tree);
                 }
@@ -40,7 +41,7 @@ class TreeMaker{
     constructor(scene, terrain){
         this.scene = scene;
         this.chunks = [];
-        this.renderdist = 1
+        this.renderdist = 8;
         this.terrain = terrain;
         this.pos = [0, 0]
 
@@ -55,7 +56,8 @@ class TreeMaker{
         bark.diffuseTexture.uScale = 2.0;//Repeat 5 times on the Vertical Axes
         bark.diffuseTexture.vScale = 2.0;//Repeat 5 times on the Horizontal Axes
 
-        this.chunk = new TreeChunk([0, 0], scene);
+        this.chunks = [];
+        this.generate();
     }
 
     distance(a, b){
@@ -63,26 +65,64 @@ class TreeMaker{
         return Math.abs(a - b);
     }
 
+    generate(){
+        for(var i = -this.renderdist; i < this.renderdist; i++){
+            for(var j = -this.renderdist; j < this.renderdist; j++){
+                var chunk = new TreeChunk([i*64, j*64], this.scene);
+                chunk.generate(this.terrain);
+                this.chunks.push(chunk);
+            }
+        }
+    }
+
     update(camera_position){
-        // if the chunk is further than render distance from the camera, destroy it
-        for (var i = 0; i < this.chunks.length; i++) {
-            if (this.distance(this.chunks[i].position[0], camera_position[0]) > this.renderdist * 100 || this.distance(this.chunks[i].position[1], camera_position[1]) > this.renderdist * 100) {
-                this.chunks[i].destroy();
-                this.chunks.splice(i, 1);
-           }
+        let positions = [];
+        camera_position[0] = Math.floor(camera_position[0] / 64) * 64;
+        camera_position[1] = Math.floor(camera_position[1] / 64) * 64;
+
+        for(var i = camera_position[0] - (this.renderdist - 1)*64; i < camera_position[0] + (this.renderdist + 1)*64; i += 64){
+            for(var j = camera_position[1] - (this.renderdist - 1)*64; j < camera_position[1] + (this.renderdist + 1)*64; j += 64){
+                positions.push([i, j]);
+            }
         }
 
-        if (this.distance(this.pos[0], camera_position[0]) > 100 || this.distance(this.pos[1], camera_position[1]) > 100) {
-            this.pos = camera_position;
-            this.chunk.refresh(this.terrain, camera_position);
+        for(var i = 0; i < this.chunks.length; i++){
+            var chunk = this.chunks[i];
+            var found = false;
+            for(var j = 0; j < positions.length; j++){
+                if(chunk.position[0] == positions[j][0] && chunk.position[1] == positions[j][1]){
+                    found = true;
+                    break;
+                }
+            }
+            if(!found){
+                chunk.destroy();
+                this.chunks.splice(i, 1);
+                i--;
+            }
+        }
+
+        for(var i = 0; i < positions.length; i++){
+            var found = false;
+            for(var j = 0; j < this.chunks.length; j++){
+                if(this.chunks[j].position[0] == positions[i][0] && this.chunks[j].position[1] == positions[i][1]){
+                    found = true;
+                    break;
+                }
+            }
+            if(!found){
+                var chunk = new TreeChunk(positions[i], this.scene);
+                chunk.generate(this.terrain);
+                this.chunks.push(chunk);
+            }
         }
     }
 }
 
 class Terrain {
   constructor(scene) {
-    var mapSubX = 1000;             // point number on X axis
-    var mapSubZ = 1000;              // point number on Z axis
+    var mapSubX = 1024;             // point number on X axis
+    var mapSubZ = 1024;             // point number on Z axis
     var seed = 0.3;                 // seed
     var noiseScale = 0.003;         // noise frequency
     var elevationScale = 32;
@@ -109,7 +149,7 @@ class Terrain {
 
     this.scene = scene;
 
-    var terrainSub = 500;
+    var terrainSub = 512;
     var params = {
       mapData: mapData, // data map declaration : what data to use ?
       mapSubX: mapSubX, // how are these data stored by rows and columns

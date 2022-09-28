@@ -13,7 +13,7 @@ var createScene = function () {
 	light.intensity = 1;
 
 	// wasd movement
-	camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(0, 69, 0), scene);
+	camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(0, 256, 0), scene);
 	camera.rotation.x = Math.PI / 2;
 	
 	terrain = new Terrain(scene);
@@ -35,22 +35,17 @@ engine.runRenderLoop(function () {
 	terrain.update([camera.position.x, camera.position.z]);
 
 	// wasd movement
-	var cameraRotation = camera.rotation.y;
 	if (keys[87]) {
-		camera_move[0] += Math.sin(cameraRotation) * cameraSpeed;
-		camera_move[1] += Math.cos(cameraRotation) * cameraSpeed;
+		camera_move[1] += cameraSpeed;
 	}
 	if (keys[83]) {
-		camera_move[0] += -Math.sin(cameraRotation) * cameraSpeed;
-		camera_move[1] += -Math.cos(cameraRotation) * cameraSpeed;
-	}
-	if (keys[68]) {
-		camera_move[0] += Math.cos(cameraRotation) * cameraSpeed;
-		camera_move[1] += -Math.sin(cameraRotation) * cameraSpeed;
+		camera_move[1] -= cameraSpeed;
 	}
 	if (keys[65]) {
-		camera_move[0] += -Math.cos(cameraRotation) * cameraSpeed;
-		camera_move[1] += Math.sin(cameraRotation) * cameraSpeed;
+		camera_move[0] -= cameraSpeed;
+	}
+	if (keys[68]) {
+		camera_move[0] += cameraSpeed;
 	}
 
 	camera.position.x += camera_move[0];
