@@ -17,7 +17,7 @@ var createScene = function () {
 	camera.rotation.x = Math.PI / 2;
 
 	// add shadow caster
-	light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(0, 256, 0), scene);
+	light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(0, 128, 0), scene);
 	light.intensity = 1000;
 	var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
 	shadowGenerator.useBlurExponentialShadowMap = true;
