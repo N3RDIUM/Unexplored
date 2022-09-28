@@ -71,8 +71,8 @@ engine.runRenderLoop(function () {
 	// get time in milliseconds
 	var time = new Date().getTime();
 	// set light position like sun
-	light.position.x = Math.sin(time * 0.0001) * 256;
-	light.position.z = Math.cos(time * 0.0001) * 256;
+	light.position.x = Math.sin(time * 0.0001) * 256 + camera.position.x;
+	light.position.z = Math.cos(time * 0.0001) * 256 + camera.position.z;
 	// set light intensity like sun
 	light.intensity = Math.sin(time * 0.0001) * 1000 + 1000;
 });
