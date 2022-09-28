@@ -12,12 +12,15 @@ class TreeChunk{
     generate(terrain){
         for (var x = this.position[0] - this.threshold; x < this.threshold + this.position[0]; x += 8) {
             for (var z = this.position[1] - this.threshold; z < this.threshold + this.position[1]; z += 8) {
-                if(terrain.getHeightFromMap(x, z) > 7){
+                if(terrain.terrain.getHeightFromMap(x, z) > 7){
                     var tree = QuickTreeGenerator(8, 6, 1, bark, green, this.scene);
                     tree.position.x = x + noise.perlin2(x / 10, z / 10)*24;
                     tree.position.z = z + noise.perlin2(x / 10, z / 10)*24;
-                    tree.position.y = terrain.getHeightFromMap(x, z);
+                    tree.position.y = terrain.terrain.getHeightFromMap(x, z);
                     this.trees.push(tree);
+
+                    // add to shadow generator
+                    terrain.shadowGenerator.addShadowCaster(tree);
                 }
             }
         }
@@ -120,7 +123,8 @@ class TreeMaker{
 }
 
 class Terrain {
-  constructor(scene) {
+  constructor(scene, shadowGenerator) {
+    this.shadowGenerator = shadowGenerator;
     var mapSubX = 1024;             // point number on X axis
     var mapSubZ = 1024;             // point number on Z axis
     var seed = 0.3;                 // seed
@@ -168,7 +172,7 @@ class Terrain {
     this.terrain.mesh.position.y = -1;
 
     // tree generation
-    this.tree = new TreeMaker(this.scene, this.terrain);
+    this.tree = new TreeMaker(this.scene, this);
   }
 
   update(camera_position){

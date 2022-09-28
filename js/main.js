@@ -9,16 +9,30 @@ var terrain, water, camera, light
 var createScene = function () {
 	const scene = new BABYLON.Scene(engine);
 
-	light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-	light.intensity = 1;
+	const light_ambient = new BABYLON.HemisphericLight("light_ambient", new BABYLON.Vector3(0, 1, 0), scene);
+	light_ambient.intensity = 0.69;
 
 	// wasd movement
-	camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(0, 256, 0), scene);
+	camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3(0, 1024, 0), scene);
 	camera.rotation.x = Math.PI / 2;
+
+	// add shadow caster
+	light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(0, 256, 0), scene);
+	light.intensity = 1000;
+	var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+	shadowGenerator.useBlurExponentialShadowMap = true;
+	shadowGenerator.blurKernel = 32;
 	
-	terrain = new Terrain(scene);
+	terrain = new Terrain(scene, shadowGenerator);
 	water = new Water(scene, terrain);
 	terrain.water = water;
+
+	shadowGenerator.addShadowCaster(terrain.terrain.mesh);
+	shadowGenerator.addShadowCaster(water.mesh);
+
+	// receive shadows
+	terrain.terrain.mesh.receiveShadows = true;
+	water.mesh.receiveShadows = true;
 
 	return scene;
 }
@@ -53,6 +67,14 @@ engine.runRenderLoop(function () {
 
 	camera_move[0] *= 0.9;
 	camera_move[1] *= 0.9;
+
+	// get time in milliseconds
+	var time = new Date().getTime();
+	// set light position like sun
+	light.position.x = Math.sin(time * 0.0001) * 256;
+	light.position.z = Math.cos(time * 0.0001) * 256;
+	// set light intensity like sun
+	light.intensity = Math.sin(time * 0.0001) * 1000 + 1000;
 });
 
 // Watch for browser/canvas resize events
